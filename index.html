@@ -1,457 +1,869 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>✨ 随意 · 色彩漫游 ✨</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⏳ 时间万象 · 沉浸式管理</title>
+    <!-- Font Awesome 图标库 (免费) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-        /* 全局重置 & 字体 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
         body {
+            background: linear-gradient(145deg, #0e121b 0%, #1a1f2e 100%);
             min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #0b0f1f, #141a2b);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
-            padding: 1.5rem;
+            padding: 2rem 1.5rem;
+            color: #eef2f8;
         }
 
-        /* 主卡片 —— 玻璃质感 + 浮游动画 */
+        /* 主容器 — 玻璃拟态 */
+        .dashboard {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.8rem;
+        }
+
+        /* 通用卡片 */
         .card {
-            max-width: 800px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(14px) saturate(180%);
-            -webkit-backdrop-filter: blur(14px) saturate(180%);
-            border-radius: 3.5rem 1.5rem 3.5rem 1.5rem;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
-            padding: 2.8rem 2.2rem;
-            transition: all 0.2s ease;
-            border: 1px solid rgba(255, 215, 150, 0.15);
-            animation: floatCard 6s infinite alternate ease-in-out;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border-radius: 2.5rem 1.2rem 2.5rem 1.2rem;
+            padding: 1.8rem 1.8rem 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 25px 40px -16px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+            transition: all 0.25s ease;
         }
 
-        @keyframes floatCard {
-            0% { transform: translateY(0px) rotate(0.5deg); }
-            100% { transform: translateY(-12px) rotate(-0.5deg); }
+        .card:hover {
+            border-color: rgba(255, 200, 150, 0.15);
+            box-shadow: 0 30px 50px -18px #000000aa, inset 0 0 0 1px rgba(255, 200, 150, 0.05);
         }
 
-        /* 标题 —— 渐变霓虹 */
-        .title {
-            font-size: clamp(2.8rem, 12vw, 4.8rem);
-            font-weight: 800;
-            letter-spacing: 4px;
-            background: linear-gradient(135deg, #f9e3b3, #ffb7c5, #b7dcff, #c3b1ff);
-            background-size: 300% 300%;
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* 标题 & 头部 */
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.4rem;
+        }
+
+        .card-header h2 {
+            font-weight: 600;
+            font-size: 1.3rem;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #f6e9d7, #ffd7b3);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            animation: gradShift 7s ease-in-out infinite alternate;
-            text-shadow: 0 0 20px rgba(255, 200, 150, 0.2);
-            margin-bottom: 0.3rem;
-            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
         }
 
-        @keyframes gradShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        .card-header h2 i {
+            color: #f3cba1;
+            font-size: 1.2rem;
         }
 
-        .subhead {
-            font-size: 1.3rem;
-            color: rgba(255, 240, 220, 0.7);
-            font-weight: 300;
-            letter-spacing: 2px;
-            border-left: 3px solid #f6b8b8;
-            padding-left: 1rem;
-            margin-bottom: 2rem;
-            text-shadow: 0 2px 6px rgba(0,0,0,0.4);
-        }
-
-        /* 内容网格 —— 灵活卡片区 */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 1.5rem;
-            margin: 2.2rem 0 2.5rem;
-        }
-
-        .grid-item {
-            background: rgba(30, 40, 60, 0.35);
-            backdrop-filter: blur(4px);
-            border-radius: 2.2rem 0.8rem 2.2rem 0.8rem;
-            padding: 1.2rem 0.8rem;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.25s ease;
-            box-shadow: 0 10px 18px -8px rgba(0, 0, 0, 0.3);
-        }
-
-        .grid-item:hover {
-            transform: scale(1.03) translateY(-4px);
-            background: rgba(50, 65, 95, 0.5);
-            border-color: rgba(255, 210, 170, 0.3);
-            box-shadow: 0 16px 28px -8px #00000066;
-        }
-
-        .grid-item .emoji-big {
-            font-size: 2.8rem;
-            display: block;
-            margin-bottom: 0.25rem;
-            filter: drop-shadow(0 4px 6px #00000055);
-        }
-
-        .grid-item .label {
+        .badge {
+            background: rgba(255, 215, 170, 0.12);
+            padding: 0.3rem 1rem;
+            border-radius: 60px;
+            font-size: 0.7rem;
             font-weight: 500;
-            color: #ece4d9;
-            font-size: 1rem;
             letter-spacing: 0.5px;
-            background: rgba(0,0,0,0.2);
-            padding: 0.2rem 0.6rem;
-            border-radius: 30px;
-            display: inline-block;
-            backdrop-filter: blur(2px);
+            color: #d6c6b0;
+            border: 1px solid rgba(255, 215, 170, 0.1);
         }
 
-        /* 装饰引用区 — 随意诗句 */
-        .quote-box {
-            background: rgba(10, 15, 28, 0.5);
-            border-radius: 3rem 0.8rem 3rem 0.8rem;
-            padding: 1.8rem 1.8rem;
-            margin: 1.8rem 0 2rem;
-            border-left: 6px solid #ffb09c;
-            box-shadow: 0 8px 18px rgba(0,0,0,0.3);
-            backdrop-filter: blur(4px);
+        /* ========== 左上：当前时间 + 聚焦 ========== */
+        .time-hero {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
         }
 
-        .quote-box p {
-            font-size: 1.25rem;
-            line-height: 1.6;
-            color: #f2e9de;
+        .time-hero .big-clock {
+            font-size: clamp(3.2rem, 8vw, 5rem);
+            font-weight: 700;
+            letter-spacing: 6px;
+            background: linear-gradient(to right, #f7e3c0, #ffdbb5, #f7c9b0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1;
+            text-shadow: 0 0 40px rgba(255, 200, 130, 0.08);
+        }
+
+        .time-hero .date-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem 2rem;
+            color: #bfb8ae;
             font-weight: 300;
-            font-style: italic;
-            text-shadow: 0 2px 4px #00000044;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
         }
 
-        .quote-box span {
-            display: block;
-            margin-top: 0.5rem;
+        .time-hero .date-row span i {
+            margin-right: 0.5rem;
+            color: #f3cba1;
+        }
+
+        .focus-tag {
+            margin-top: 0.8rem;
+            background: rgba(255, 210, 160, 0.06);
+            border-radius: 60px;
+            padding: 0.5rem 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            border: 1px solid rgba(255, 210, 160, 0.1);
             font-size: 0.9rem;
-            color: #cfc1b0;
-            text-align: right;
-            font-style: normal;
-            letter-spacing: 1px;
         }
 
-        /* 底部按钮 + 小彩蛋 */
-        .action-row {
+        .focus-tag i {
+            color: #f5b88e;
+        }
+
+        /* ========== 右上：进度环 ========== */
+        .progress-ring-wrap {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .ring-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .ring-item canvas {
+            width: 80px;
+            height: 80px;
+            display: block;
+        }
+
+        .ring-label {
+            margin-top: 0.4rem;
+            font-size: 0.75rem;
+            color: #b8ae9e;
+            letter-spacing: 0.5px;
+        }
+
+        .ring-value {
+            font-weight: 600;
+            color: #eadbc8;
+            font-size: 0.9rem;
+        }
+
+        /* ========== 任务看板 ========== */
+        .task-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .task-item {
+            background: rgba(30, 40, 60, 0.3);
+            border-radius: 1.8rem 0.6rem 1.8rem 0.6rem;
+            padding: 1rem 1.2rem;
+            border-left: 3px solid #f3b58c;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-item .task-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .task-item .task-title {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #f0e6db;
+        }
+
+        .task-item .task-meta {
+            font-size: 0.7rem;
+            color: #938b7f;
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .task-item .task-tag {
+            background: rgba(255, 200, 150, 0.1);
+            padding: 0.15rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.6rem;
+            color: #dbbca4;
+        }
+
+        .task-item .task-check {
+            width: 28px;
+            height: 28px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 215, 170, 0.2);
+            background: transparent;
+            color: #b8a89a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .task-item .task-check:hover {
+            background: rgba(255, 215, 170, 0.1);
+            border-color: #f3cba1;
+            color: #f3cba1;
+        }
+
+        .task-item.done {
+            opacity: 0.5;
+            border-left-color: #6f8f7c;
+        }
+
+        .task-item.done .task-title {
+            text-decoration: line-through;
+            color: #8f8a82;
+        }
+
+        /* ========== 时间轴 ========== */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .tl-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            border-left: 3px solid #f3b58c;
+        }
+
+        .tl-item .tl-time {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #e6d5be;
+            min-width: 70px;
+        }
+
+        .tl-item .tl-content {
+            flex: 1;
+            font-size: 0.9rem;
+            color: #d9cebf;
+        }
+
+        .tl-item .tl-icon {
+            color: #ecc39e;
+            font-size: 0.9rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .tl-item.past {
+            opacity: 0.6;
+            border-left-color: #5d6b7a;
+        }
+
+        .tl-item.now {
+            border-left-color: #f5b88e;
+            background: rgba(255, 200, 150, 0.06);
+            box-shadow: 0 0 20px rgba(255, 200, 150, 0.02);
+        }
+
+        /* ========== 统计 ========== */
+        .stats-row {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            align-items: center;
             gap: 1rem;
-            margin-top: 0.8rem;
         }
 
-        .btn {
-            background: rgba(235, 215, 195, 0.1);
-            border: 1px solid rgba(255, 215, 170, 0.25);
-            backdrop-filter: blur(6px);
-            padding: 0.8rem 2rem;
+        .stat-block {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 2rem 0.6rem 2rem 0.6rem;
+            padding: 0.8rem 1.5rem;
+            flex: 1;
+            min-width: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .stat-block .num {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #f3dcc4;
+        }
+
+        .stat-block .label {
+            font-size: 0.7rem;
+            color: #a09586;
+            letter-spacing: 0.5px;
+        }
+
+        /* ========== 番茄钟 ========== */
+        .pomodoro-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .pomodoro-box .pomo-display {
+            font-size: 3.4rem;
+            font-weight: 600;
+            letter-spacing: 6px;
+            background: linear-gradient(to right, #f7e3c0, #f7d0b0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .pomo-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .pomo-controls button {
+            background: rgba(255, 215, 170, 0.06);
+            border: 1px solid rgba(255, 215, 170, 0.15);
+            padding: 0.4rem 1.6rem;
             border-radius: 60px;
+            color: #e6d5be;
             font-weight: 500;
-            font-size: 1.1rem;
-            color: #f1e2d4;
+            font-size: 0.85rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            letter-spacing: 1px;
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 0.4rem;
         }
 
-        .btn:hover {
-            background: rgba(255, 210, 170, 0.2);
-            border-color: #ffc8a2;
-            transform: scale(1.02);
-            color: #fff8f0;
-            box-shadow: 0 8px 20px #00000055;
+        .pomo-controls button:hover {
+            background: rgba(255, 215, 170, 0.12);
+            border-color: #f3cba1;
+            color: #f7eee5;
         }
 
-        .btn:active {
-            transform: scale(0.96);
+        .pomo-controls button:active {
+            transform: scale(0.95);
         }
 
-        .btn-emoji {
-            font-size: 1.4rem;
+        /* ========== 响应式 ========== */
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .task-grid {
+                grid-template-columns: 1fr;
+            }
+            .ring-item canvas {
+                width: 70px;
+                height: 70px;
+            }
         }
 
-        .footer-meta {
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem 0.8rem;
+            }
+            .card {
+                padding: 1.2rem 1rem;
+            }
+            .stat-block {
+                min-width: 70px;
+                padding: 0.6rem 1rem;
+            }
+            .tl-item {
+                flex-wrap: wrap;
+                gap: 0.2rem;
+            }
+            .tl-item .tl-time {
+                min-width: 60px;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar {
+            width: 4px;
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 170, 0.2);
+            border-radius: 10px;
+        }
+
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.02);
+            border: none;
+            color: #c9beb0;
+            cursor: pointer;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
             font-size: 0.8rem;
-            color: rgba(190, 180, 170, 0.6);
-            letter-spacing: 1px;
-            padding-top: 1.5rem;
-            text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            margin-top: 0.5rem;
+            transition: 0.15s;
+        }
+        .glass-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #f0e6db;
         }
 
-        /* 响应式微调 */
-        @media (max-width: 500px) {
-            .card { padding: 1.8rem 1.2rem; }
-            .grid { grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-            .quote-box p { font-size: 1rem; }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .gap-2 {
+            gap: 0.5rem;
+        }
+        .mt-2 {
+            margin-top: 0.8rem;
+        }
+        .text-muted {
+            color: #887e72;
+            font-size: 0.8rem;
         }
 
-        /* 额外：动态粒子背景 (纯CSS小光点) */
-        .particle-bg {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
+        /* 任务添加行 */
+        .add-task-row {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 1rem;
         }
-
-        .particle-bg span {
-            position: absolute;
-            display: block;
-            width: 6px;
-            height: 6px;
-            background: rgba(255, 215, 180, 0.25);
-            border-radius: 50%;
-            box-shadow: 0 0 12px #ffb08c55;
-            animation: drift 22s infinite alternate ease-in-out;
+        .add-task-row input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 215, 170, 0.08);
+            border-radius: 60px;
+            padding: 0.5rem 1.2rem;
+            color: #f0e6db;
+            font-size: 0.9rem;
+            outline: none;
+            transition: 0.2s;
         }
-
-        /* 随机生成20个光点 使用nth-child 分别定位 */
-        .particle-bg span:nth-child(1) { left: 10%; top: 20%; animation-duration: 18s; width: 8px; height: 8px; background: #fbc4ab55; }
-        .particle-bg span:nth-child(2) { left: 85%; top: 70%; animation-duration: 24s; width: 12px; height: 12px; background: #b7b8ff44; }
-        .particle-bg span:nth-child(3) { left: 45%; top: 90%; animation-duration: 20s; width: 5px; height: 5px; }
-        .particle-bg span:nth-child(4) { left: 22%; top: 65%; animation-duration: 26s; width: 10px; height: 10px; background: #f3d6a055; }
-        .particle-bg span:nth-child(5) { left: 70%; top: 15%; animation-duration: 16s; width: 7px; height: 7px; }
-        .particle-bg span:nth-child(6) { left: 5%; top: 45%; animation-duration: 30s; width: 14px; height: 14px; background: #b5d9ff33; }
-        .particle-bg span:nth-child(7) { left: 92%; top: 40%; animation-duration: 19s; width: 9px; height: 9px; }
-        .particle-bg span:nth-child(8) { left: 50%; top: 10%; animation-duration: 27s; width: 6px; height: 6px; background: #fccfcf55; }
-        .particle-bg span:nth-child(9) { left: 33%; top: 33%; animation-duration: 21s; width: 11px; height: 11px; }
-        .particle-bg span:nth-child(10) { left: 77%; top: 88%; animation-duration: 23s; width: 8px; height: 8px; background: #f6e3b3aa; }
-
-        @keyframes drift {
-            0% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-            100% { transform: translate(40px, -60px) scale(1.6); opacity: 0.9; }
+        .add-task-row input:focus {
+            border-color: rgba(255, 215, 170, 0.3);
+            background: rgba(0, 0, 0, 0.35);
         }
-
-        /* 保证内容在粒子之上 */
-        .card, .particle-bg {
-            position: relative;
-            z-index: 2;
+        .add-task-row input::placeholder {
+            color: #6a6258;
         }
-        body {
-            position: relative;
+        .add-task-row button {
+            background: rgba(255, 215, 170, 0.08);
+            border: 1px solid rgba(255, 215, 170, 0.1);
+            border-radius: 60px;
+            padding: 0.5rem 1.6rem;
+            color: #e6d5be;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .add-task-row button:hover {
+            background: rgba(255, 215, 170, 0.15);
         }
     </style>
 </head>
 <body>
-    <!-- 纯CSS粒子装饰（随意浮动） -->
-    <div class="particle-bg" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span>
+
+<div class="dashboard">
+
+    <!-- ===== 卡片 1: 当前时间 + 聚焦 ===== -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-clock"></i> 此刻</h2>
+            <span class="badge"><i class="fas fa-circle" style="color: #f5b88e; font-size: 0.5rem; margin-right: 6px;"></i> 专注</span>
+        </div>
+        <div class="time-hero">
+            <div class="big-clock" id="liveClock">--:--:--</div>
+            <div class="date-row">
+                <span><i class="fas fa-calendar-alt"></i> <span id="liveDate">----年--月--日</span></span>
+                <span><i class="fas fa-map-pin"></i> <span id="weekDay">星期-</span></span>
+            </div>
+            <div class="focus-tag">
+                <i class="fas fa-bullseye"></i> 今日聚焦 · 深度工作 3 小时
+                <span style="margin-left: auto; font-size: 0.8rem; color: #b8a89a;">剩余 1.2h</span>
+            </div>
+        </div>
     </div>
 
-    <!-- 主卡片 -->
-    <main class="card" role="main">
-        <h1 class="title">✦ 随 意 ✦</h1>
-        <div class="subhead">· 漫无目的 · 色彩游荡 ·</div>
+    <!-- ===== 卡片 2: 环形进度 ===== -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-chart-pie"></i> 今日进度</h2>
+            <span class="badge"><i class="fas fa-sync-alt fa-fw"></i> 实时</span>
+        </div>
+        <div class="progress-ring-wrap">
+            <div class="ring-item">
+                <canvas id="ringWork" width="100" height="100"></canvas>
+                <span class="ring-label">工作时间</span>
+                <span class="ring-value" id="workPercent">72%</span>
+            </div>
+            <div class="ring-item">
+                <canvas id="ringHealth" width="100" height="100"></canvas>
+                <span class="ring-label">健康习惯</span>
+                <span class="ring-value" id="healthPercent">45%</span>
+            </div>
+            <div class="ring-item">
+                <canvas id="ringLearn" width="100" height="100"></canvas>
+                <span class="ring-label">学习成长</span>
+                <span class="ring-value" id="learnPercent">88%</span>
+            </div>
+        </div>
+    </div>
 
-        <!-- 网格小卡片 —— 随意组合 -->
-        <div class="grid">
-            <div class="grid-item">
-                <span class="emoji-big">🌈</span>
-                <span class="label">光谱</span>
-            </div>
-            <div class="grid-item">
-                <span class="emoji-big">🌀</span>
-                <span class="label">律动</span>
-            </div>
-            <div class="grid-item">
-                <span class="emoji-big">🌊</span>
-                <span class="label">涟漪</span>
-            </div>
-            <div class="grid-item">
-                <span class="emoji-big">✨</span>
-                <span class="label">星尘</span>
+    <!-- ===== 卡片 3: 任务看板 (全宽) ===== -->
+    <div class="card full-width">
+        <div class="card-header">
+            <h2><i class="fas fa-tasks"></i> 任务看板 · 四象限</h2>
+            <div style="display: flex; gap: 0.5rem;">
+                <span class="badge" style="background: rgba(200,200,200,0.05);">优先级</span>
+                <span class="badge">今日 6 项</span>
             </div>
         </div>
 
-        <!-- 引用区块 — 随意诗句 -->
-        <div class="quote-box">
-            <p>“允许一切发生，<br>像风穿过树林，像光漫过窗台。” </p>
-            <span>—— 佚名 · 随意集</span>
+        <div class="task-grid" id="taskGrid">
+            <!-- 任务由 JS 动态渲染 -->
         </div>
 
-        <!-- 交互区域 + 彩蛋按钮 -->
-        <div class="action-row">
-            <button class="btn" id="randomColorBtn" aria-label="随机更换卡片强调色">
-                <span class="btn-emoji">🎨</span> 换色
-            </button>
-            <button class="btn" id="quoteBtn" aria-label="随机显示一句小语">
-                <span class="btn-emoji">💬</span> 絮语
-            </button>
-            <span style="font-size: 0.9rem; color: #a89788; opacity: 0.8; letter-spacing: 0.5px; background: rgba(0,0,0,0.2); padding: 0.2rem 1rem; border-radius: 30px;">
-                ⚡ 随意点
-            </span>
+        <!-- 添加任务 -->
+        <div class="add-task-row">
+            <input type="text" id="newTaskInput" placeholder="新任务 … 例如：写周报" />
+            <button id="addTaskBtn"><i class="fas fa-plus"></i> 添加</button>
         </div>
+    </div>
 
-        <!-- footer 小信息 -->
-        <div class="footer-meta">
-            ⚡ 纯 HTML · 随心而造 ⚡
+    <!-- ===== 卡片 4: 时间轴 (全宽) ===== -->
+    <div class="card full-width">
+        <div class="card-header">
+            <h2><i class="fas fa-stream"></i> 今日时间线</h2>
+            <span class="badge"><i class="fas fa-flag"></i> 8 个事件</span>
         </div>
-    </main>
+        <div class="timeline" id="timelineContainer">
+            <!-- 由 JS 动态生成 -->
+        </div>
+    </div>
 
-    <!-- 简单的交互 JS （纯增强，无依赖） -->
-    <script>
-        (function() {
-            "use strict";
+    <!-- ===== 卡片 5: 统计 + 番茄钟 ===== -->
+    <div class="card full-width">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;">
+            <!-- 左侧统计 -->
+            <div>
+                <div class="card-header" style="margin-bottom: 0.8rem;">
+                    <h2 style="font-size: 1rem;"><i class="fas fa-chart-bar"></i> 统计概览</h2>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-block"><span class="num">42</span> <span class="label">总任务</span></div>
+                    <div class="stat-block"><span class="num">28</span> <span class="label">已完成</span></div>
+                    <div class="stat-block"><span class="num">6.2h</span> <span class="label">总专注</span></div>
+                    <div class="stat-block"><span class="num">4</span> <span class="label">进行中</span></div>
+                </div>
+            </div>
+            <!-- 右侧番茄钟 -->
+            <div>
+                <div class="card-header" style="margin-bottom: 0.4rem;">
+                    <h2 style="font-size: 1rem;"><i class="fas fa-stopwatch"></i> 番茄钟</h2>
+                </div>
+                <div class="pomodoro-box">
+                    <div class="pomo-display" id="pomoDisplay">25:00</div>
+                    <div class="pomo-controls">
+                        <button id="pomoStart"><i class="fas fa-play"></i> 开始</button>
+                        <button id="pomoPause"><i class="fas fa-pause"></i> 暂停</button>
+                        <button id="pomoReset"><i class="fas fa-undo-alt"></i> 重置</button>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #887e72;">
+                        <span id="pomoStatus">就绪</span> · 循环 <span id="pomoCycle">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            // 获取元素
-            const card = document.querySelector('.card');
-            const quoteBox = document.querySelector('.quote-box p');
-            const quoteSpan = document.querySelector('.quote-box span');
-            const randomBtn = document.getElementById('randomColorBtn');
-            const quoteBtn = document.getElementById('quoteBtn');
+</div>
 
-            // 随机色板 (柔和)
-            const colorPalette = [
-                { border: '#f6b8b8', bg: 'rgba(255, 180, 160, 0.15)', shadow: '#f6b8b855' },
-                { border: '#b8d9f6', bg: 'rgba(160, 200, 255, 0.12)', shadow: '#b8d9f655' },
-                { border: '#c3b1ff', bg: 'rgba(180, 160, 255, 0.12)', shadow: '#c3b1ff55' },
-                { border: '#f9e3b3', bg: 'rgba(245, 215, 160, 0.15)', shadow: '#f9e3b355' },
-                { border: '#b3f0d9', bg: 'rgba(150, 230, 200, 0.12)', shadow: '#b3f0d955' },
-                { border: '#ffb7c5', bg: 'rgba(255, 180, 190, 0.15)', shadow: '#ffb7c555' },
-                { border: '#d4b8ff', bg: 'rgba(200, 170, 255, 0.12)', shadow: '#d4b8ff55' },
-            ];
+<script>
+    (function() {
+        "use strict";
 
-            // 随机絮语库
-            const quotes = [
-                { text: '“做一阵风，吹过就好，不必在意方向。”', author: '· 随想 ·' },
-                { text: '“云朵从不计划自己的形状，却总是好看。”', author: '· 天空日记 ·' },
-                { text: '“允许自己像一棵树，安静地站着，也随意地摇动。”', author: '· 自然集 ·' },
-                { text: '“把今天过成一首没有标题的诗。”', author: '· 零碎 ·' },
-                { text: '“色彩是世界的自言自语。”', author: '· 调色盘 ·' },
-                { text: '“随性不是懒散，是给灵魂透气。”', author: '· 片刻 ·' },
-                { text: '“像猫一样，在阳光里打盹，在月光下踱步。”', author: '· 慵懒哲学 ·' },
-            ];
+        // ---- 工具 ----
+        function pad(n) { return n.toString().padStart(2, '0'); }
 
-            // 当前索引 (用于轮换)
-            let quoteIndex = 0;
+        // ---- 实时时钟 ----
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveClock').textContent =
+                pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+            document.getElementById('liveDate').textContent =
+                now.getFullYear() + '年' + pad(now.getMonth() + 1) + '月' + pad(now.getDate()) + '日';
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            document.getElementById('weekDay').textContent = weekdays[now.getDay()];
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
 
-            // 随机更换卡片强调色 (边框 + 左侧边框 + 阴影)
-            function setRandomColor() {
-                const randomIdx = Math.floor(Math.random() * colorPalette.length);
-                const color = colorPalette[randomIdx];
-                // 修改卡片边框 & 左border & 引用框左边框 & 按钮hover边框微调 (仅演示)
-                card.style.borderColor = color.border;
-                card.style.boxShadow = `0 30px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px ${color.border} inset`;
-                // 引用框左边框
-                const quoteBoxEl = document.querySelector('.quote-box');
-                if (quoteBoxEl) {
-                    quoteBoxEl.style.borderLeftColor = color.border;
-                    quoteBoxEl.style.boxShadow = `0 8px 18px rgba(0,0,0,0.3), 0 0 0 1px ${color.border}22 inset`;
-                }
-                // 子标题左边框 也调整
-                const subhead = document.querySelector('.subhead');
-                if (subhead) {
-                    subhead.style.borderLeftColor = color.border;
-                }
-                // 小彩蛋：给按钮一个微弱边框变化
-                document.querySelectorAll('.btn').forEach(btn => {
-                    btn.style.borderColor = color.border + '66';
-                });
-            }
+        // ---- 环形进度图 ----
+        function drawRing(canvasId, percent, color1, color2) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            const cx = w / 2, cy = h / 2, radius = 36, lineWidth = 8;
+            ctx.clearRect(0, 0, w, h);
 
-            // 更换絮语 (轮换 + 随机)
-            function setRandomQuote() {
-                // 随机选取一条，避免与当前相同 (简单处理)
-                let newIndex;
-                do {
-                    newIndex = Math.floor(Math.random() * quotes.length);
-                } while (quotes.length > 1 && newIndex === quoteIndex);
-                quoteIndex = newIndex;
+            // 背景弧
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
 
-                const selected = quotes[quoteIndex];
-                if (quoteBox) {
-                    quoteBox.textContent = selected.text;
-                }
-                if (quoteSpan) {
-                    quoteSpan.textContent = selected.author;
-                }
-            }
+            // 前景弧
+            const start = -Math.PI / 2;
+            const end = start + (2 * Math.PI * (percent / 100));
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, start, end);
+            const grad = ctx.createLinearGradient(0, 0, w, h);
+            grad.addColorStop(0, color1);
+            grad.addColorStop(1, color2);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = lineWidth;
+            ctx.lineCap = 'round';
+            ctx.stroke();
 
-            // 初始化: 随机一个颜色 + 随机一条quote
-            function initRandom() {
-                // 随机颜色
-                const randomIdx = Math.floor(Math.random() * colorPalette.length);
-                const color = colorPalette[randomIdx];
-                card.style.borderColor = color.border;
-                card.style.boxShadow = `0 30px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px ${color.border} inset`;
-                const quoteBoxEl = document.querySelector('.quote-box');
-                if (quoteBoxEl) {
-                    quoteBoxEl.style.borderLeftColor = color.border;
-                    quoteBoxEl.style.boxShadow = `0 8px 18px rgba(0,0,0,0.3), 0 0 0 1px ${color.border}22 inset`;
-                }
-                const subhead = document.querySelector('.subhead');
-                if (subhead) {
-                    subhead.style.borderLeftColor = color.border;
-                }
-                document.querySelectorAll('.btn').forEach(btn => {
-                    btn.style.borderColor = color.border + '66';
-                });
+            // 内圈小点
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius - 2, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
 
-                // 随机初始絮语
-                const initQuoteIdx = Math.floor(Math.random() * quotes.length);
-                quoteIndex = initQuoteIdx;
-                const initQuote = quotes[initQuoteIdx];
-                if (quoteBox) {
-                    quoteBox.textContent = initQuote.text;
-                }
-                if (quoteSpan) {
-                    quoteSpan.textContent = initQuote.author;
-                }
-            }
+        // 初始化环形
+        drawRing('ringWork', 72, '#f5b88e', '#f3d09e');
+        drawRing('ringHealth', 45, '#8fc9b0', '#b4d9c4');
+        drawRing('ringLearn', 88, '#b8a8e0', '#d4c4f0');
 
-            // 绑定事件
-            if (randomBtn) {
-                randomBtn.addEventListener('click', setRandomColor);
-            }
-            if (quoteBtn) {
-                quoteBtn.addEventListener('click', setRandomQuote);
-            }
+        // 动态模拟数值 (每分钟变化)
+        setInterval(() => {
+            const w = Math.min(100, Math.floor(72 + (Math.random() - 0.5) * 6));
+            const h = Math.min(100, Math.max(20, Math.floor(45 + (Math.random() - 0.5) * 8)));
+            const l = Math.min(100, Math.max(60, Math.floor(88 + (Math.random() - 0.5) * 6)));
+            document.getElementById('workPercent').textContent = w + '%';
+            document.getElementById('healthPercent').textContent = h + '%';
+            document.getElementById('learnPercent').textContent = l + '%';
+            drawRing('ringWork', w, '#f5b88e', '#f3d09e');
+            drawRing('ringHealth', h, '#8fc9b0', '#b4d9c4');
+            drawRing('ringLearn', l, '#b8a8e0', '#d4c4f0');
+        }, 8000);
 
-            // 执行一次初始化
-            initRandom();
+        // ---- 任务看板 (四象限风格) ----
+        let tasks = [
+            { id: 1, title: '完成项目方案', tag: '重要·紧急', done: false },
+            { id: 2, title: '回复客户邮件', tag: '重要·不紧急', done: false },
+            { id: 3, title: '整理笔记', tag: '不重要·紧急', done: true },
+            { id: 4, title: '阅读 30min', tag: '不重要·不紧急', done: false },
+            { id: 5, title: '团队周会', tag: '重要·紧急', done: false },
+            { id: 6, title: '代码 review', tag: '重要·不紧急', done: false },
+        ];
+        let taskIdCounter = 7;
 
-            // 额外：双击卡片小彩蛋 (重置为更随意的组合)
-            card.addEventListener('dblclick', function(e) {
-                // 同时更换颜色 + 絮语
-                setRandomColor();
-                setRandomQuote();
-                // 微反馈：卡片闪一下
-                card.style.transition = 'all 0.08s ease';
-                card.style.transform = 'scale(0.98)';
-                setTimeout(() => {
-                    card.style.transform = '';
-                }, 100);
+        function renderTasks() {
+            const grid = document.getElementById('taskGrid');
+            grid.innerHTML = '';
+            tasks.forEach(t => {
+                const div = document.createElement('div');
+                div.className = 'task-item' + (t.done ? ' done' : '');
+                div.innerHTML = `
+                    <div class="task-info">
+                        <div class="task-title">${t.title}</div>
+                        <div class="task-meta">
+                            <span class="task-tag">${t.tag}</span>
+                            <span>${t.done ? '✅ 已完成' : '⏳ 进行中'}</span>
+                        </div>
+                    </div>
+                    <button class="task-check" data-id="${t.id}" aria-label="切换完成状态">
+                        <i class="fas ${t.done ? 'fa-check-circle' : 'fa-circle'}"></i>
+                    </button>
+                `;
+                grid.appendChild(div);
             });
+            // 绑定切换事件
+            document.querySelectorAll('.task-check').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const id = parseInt(this.dataset.id);
+                    const task = tasks.find(t => t.id === id);
+                    if (task) {
+                        task.done = !task.done;
+                        renderTasks();
+                        updateStats();
+                    }
+                });
+            });
+            updateStats();
+        }
 
-        })();
-    </script>
+        // 添加任务
+        document.getElementById('addTaskBtn').addEventListener('click', function() {
+            const input = document.getElementById('newTaskInput');
+            const text = input.value.trim();
+            if (!text) return;
+            const tags = ['重要·紧急', '重要·不紧急', '不重要·紧急', '不重要·不紧急'];
+            const randomTag = tags[Math.floor(Math.random() * tags.length)];
+            tasks.push({ id: taskIdCounter++, title: text, tag: randomTag, done: false });
+            input.value = '';
+            renderTasks();
+        });
+        // 回车添加
+        document.getElementById('newTaskInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') document.getElementById('addTaskBtn').click();
+        });
+
+        // 更新统计（简单）
+        function updateStats() {
+            const total = tasks.length;
+            const done = tasks.filter(t => t.done).length;
+            const stats = document.querySelectorAll('.stat-block .num');
+            if (stats.length >= 4) {
+                stats[0].textContent = total;
+                stats[1].textContent = done;
+                stats[2].textContent = (done / total * 6.2).toFixed(1) + 'h';
+                stats[3].textContent = total - done;
+            }
+        }
+
+        // ---- 时间轴 (动态) ----
+        const timelineEvents = [
+            { time: '07:30', icon: '🌅', content: '起床 · 晨间冥想', past: true },
+            { time: '08:15', icon: '☕', content: '早餐 & 规划', past: true },
+            { time: '09:00', icon: '💻', content: '深度工作 (编码)', past: true },
+            { time: '11:30', icon: '📞', content: '团队站会', past: true },
+            { time: '13:00', icon: '🍱', content: '午休 · 散步', past: false },
+            { time: '14:30', icon: '📚', content: '学习 · 系统设计', past: false },
+            { time: '16:00', icon: '✍️', content: '文档 & 复盘', past: false },
+            { time: '18:30', icon: '🏋️', content: '健身 · 放松', past: false },
+        ];
+
+        function renderTimeline() {
+            const container = document.getElementById('timelineContainer');
+            container.innerHTML = '';
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            timelineEvents.forEach(ev => {
+                const [h, m] = ev.time.split(':').map(Number);
+                const evMinutes = h * 60 + m;
+                const isPast = evMinutes < currentMinutes;
+                const div = document.createElement('div');
+                div.className = 'tl-item' + (isPast ? ' past' : '') + (ev.content.includes('深度工作') ? ' now' : '');
+                div.innerHTML = `
+                    <span class="tl-time">${ev.time}</span>
+                    <span class="tl-icon">${ev.icon}</span>
+                    <span class="tl-content">${ev.content}</span>
+                    <span style="font-size:0.6rem; color:#5d5a55;">${isPast ? '✓ 已过' : '⏳ 未到'}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // ---- 番茄钟 ----
+        let pomoSeconds = 25 * 60;
+        let pomoInterval = null;
+        let pomoRunning = false;
+        let pomoCycleCount = 0;
+
+        function updatePomoDisplay() {
+            const m = Math.floor(pomoSeconds / 60);
+            const s = pomoSeconds % 60;
+            document.getElementById('pomoDisplay').textContent = pad(m) + ':' + pad(s);
+            document.getElementById('pomoStatus').textContent = pomoRunning ? '运行中' : '已暂停';
+        }
+
+        function pomoTick() {
+            if (pomoSeconds <= 0) {
+                clearInterval(pomoInterval);
+                pomoRunning = false;
+                pomoCycleCount++;
+                document.getElementById('pomoCycle').textContent = pomoCycleCount;
+                document.getElementById('pomoStatus').textContent = '✅ 完成!';
+                // 自动重置到25min
+                pomoSeconds = 25 * 60;
+                updatePomoDisplay();
+                return;
+            }
+            pomoSeconds--;
+            updatePomoDisplay();
+        }
+
+        document.getElementById('pomoStart').addEventListener('click', function() {
+            if (pomoRunning) return;
+            if (pomoSeconds <= 0) { pomoSeconds = 25 * 60; }
+            pomoRunning = true;
+            document.getElementById('pomoStatus').textContent = '运行中';
+            pomoInterval = setInterval(pomoTick, 1000);
+        });
+        document.getElementById('pomoPause').addEventListener('click', function() {
+            if (pomoInterval) {
+                clearInterval(pomoInterval);
+                pomoInterval = null;
+                pomoRunning = false;
+                document.getElementById('pomoStatus').textContent = '已暂停';
+            }
+        });
+        document.getElementById('pomoReset').addEventListener('click', function() {
+            if (pomoInterval) {
+                clearInterval(pomoInterval);
+                pomoInterval = null;
+            }
+            pomoRunning = false;
+            pomoSeconds = 25 * 60;
+            document.getElementById('pomoStatus').textContent = '已重置';
+            updatePomoDisplay();
+        });
+
+        // ---- 初始化 ----
+        renderTasks();
+        renderTimeline();
+        updatePomoDisplay();
+
+        // 每分钟刷新时间轴 (自动标记过去)
+        setInterval(renderTimeline, 60000);
+
+        // 额外：双击时间线重置 (demo)
+        document.getElementById('timelineContainer').addEventListener('dblclick', function() {
+            // 仅仅刷新
+            renderTimeline();
+        });
+
+        console.log('⏳ 时间万象 · 沉浸管理已启动');
+    })();
+</script>
 
 </body>
 </html>
