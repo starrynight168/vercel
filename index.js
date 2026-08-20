@@ -965,37 +965,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
 </body>
 </html>`;
 
-// ========================== HTTP 路由 ==========================
-const httpServer = http.createServer(async (req, res) => {
-  if (req.url === '/' || req.url.startsWith('/?')) {
-    // 强制不缓存，确保立即生效
-    res.writeHead(200, { 
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'no-cache, no-store, must-revalidate'
-    });
-    res.end(HTML_CONTENT);
-    return;
-  } else if (req.url === `/${SUB_PATH}`) {
-    await getisp();
-    await getip();
-    const namePart = NAME ? `${NAME}-${ISP}` : ISP;
-    const tlsParam = Tls === 'tls' ? 'tls' : 'none';
-    const ssTlsParam = Tls === 'tls' ? 'tls;' : '';
-    const vlsURL = `vless://${UUID}@${CurrentDomain}:${CurrentPort}?encryption=none&security=${tlsParam}&sni=${CurrentDomain}&fp=chrome&type=ws&host=${CurrentDomain}&path=%2F${WSPATH}#${namePart}`;
-    const troURL = `trojan://${UUID}@${CurrentDomain}:${CurrentPort}?security=${tlsParam}&sni=${CurrentDomain}&fp=chrome&type=ws&host=${CurrentDomain}&path=%2F${WSPATH}#${namePart}`;
-    const ssMethodPassword = Buffer.from(`none:${UUID}`).toString('base64');
-    const ssURL = `ss://${ssMethodPassword}@${CurrentDomain}:${CurrentPort}?plugin=v2ray-plugin;mode%3Dwebsocket;host%3D${CurrentDomain};path%3D%2F${WSPATH};${ssTlsParam}sni%3D${CurrentDomain};skip-cert-verify%3Dtrue;mux%3D0#${namePart}`;
-    const subscription = vlsURL + '\n' + troURL + '\n' + ssURL;
-    const base64Content = Buffer.from(subscription).toString('base64');
-
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end(base64Content + '\n');
-  } else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not Found\n');
-  }
-});
-
 // Custom DNS
 function resolveHost(host) {
   return new Promise((resolve, reject) => {
@@ -1144,27 +1113,6 @@ function handleSsConnection(ws, msg) {
     return true;
   } catch (error) { return false; }
 }
-
-// WebSocket 监听
-const wss = new WebSocket.Server({ server: httpServer });
-wss.on('connection', (ws, req) => {
-  const url = req.url || '';
-  const expectedPath = `/${WSPATH}`;
-  if (!url.startsWith(expectedPath)) { ws.close(); return; }
-
-  ws.once('message', msg => {
-    if (msg.length > 17 && msg[0] === 0) {
-      const id = msg.slice(1, 17);
-      const isVless = id.every((v, i) => v == parseInt(uuid.substr(i * 2, 2), 16));
-      if (isVless) { if (!handleVlsConnection(ws, msg)) ws.close(); return; }
-    }
-    if (msg.length >= 58) { if (handleTrojConnection(ws, msg)) return; }
-    if (msg.length > 0 && (msg[0] === 0x01 || msg[0] === 0x03 || msg[0] === 0x04)) {
-      if (handleSsConnection(ws, msg)) return;
-    }
-    ws.close();
-  }).on('error', () => { });
-});
 
 // 自动保活任务
 async function addAccessTask() {
@@ -1827,9 +1775,49 @@ async function startNezhaAgent() {
     }
 }
 
-// 启动服务
-httpServer.listen(PORT, () => {
-  startNezhaAgent().catch(err => console.error('error', err));
-  addAccessTask();
-  console.log(`Server is running on ${PORT}`);
-});
+// ========================== 标准 Vercel Serverless 入口 ==========================
+let nezhaStarted = false;
+
+module.exports = async (req, res) => {
+  // 首次请求触发哪吒后台上报及自动保活
+  if (!nezhaStarted) {
+    nezhaStarted = true;
+    startNezhaAgent().catch(err => console.error('nezha error', err));
+    addAccessTask();
+  }
+
+  const url = req.url || '/';
+
+  // 1. 匹配根路径（兼容 Vercel rewrite 后的各种形式）
+  if (url === '/' || url === '/index.js' || url === '' || url.startsWith('/?')) {
+    res.writeHead(200, { 
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    });
+    res.end(HTML_CONTENT);
+    return;
+  } 
+  
+  // 2. 匹配订阅路径
+  if (url === `/${SUB_PATH}` || url.startsWith(`/${SUB_PATH}?`)) {
+    await getisp();
+    await getip();
+    const namePart = NAME ? `${NAME}-${ISP}` : ISP;
+    const tlsParam = Tls === 'tls' ? 'tls' : 'none';
+    const ssTlsParam = Tls === 'tls' ? 'tls;' : '';
+    const vlsURL = `vless://${UUID}@${CurrentDomain}:${CurrentPort}?encryption=none&security=${tlsParam}&sni=${CurrentDomain}&fp=chrome&type=ws&host=${CurrentDomain}&path=%2F${WSPATH}#${namePart}`;
+    const troURL = `trojan://${UUID}@${CurrentDomain}:${CurrentPort}?security=${tlsParam}&sni=${CurrentDomain}&fp=chrome&type=ws&host=${CurrentDomain}&path=%2F${WSPATH}#${namePart}`;
+    const ssMethodPassword = Buffer.from(`none:${UUID}`).toString('base64');
+    const ssURL = `ss://${ssMethodPassword}@${CurrentDomain}:${CurrentPort}?plugin=v2ray-plugin;mode%3Dwebsocket;host%3D${CurrentDomain};path%3D%2F${WSPATH};${ssTlsParam}sni%3D${CurrentDomain};skip-cert-verify%3Dtrue;mux%3D0#${namePart}`;
+    const subscription = vlsURL + '\n' + troURL + '\n' + ssURL;
+    const base64Content = Buffer.from(subscription).toString('base64');
+
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end(base64Content + '\n');
+    return;
+  }
+
+  // 3. 其它 404
+  res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+  res.end('Not Found\n');
+};
