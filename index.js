@@ -49,7 +49,7 @@ const BLOCKED_DOMAINS = [
    'testmy.net', 'bandwidth.place', 'speed.io', 'librespeed.org', 'speedcheck.org'
 ];
 
-//  TLS 检测
+// TLS 检测
 function shouldUseTLS(server) {
     const parts = server.split(':');
     if (parts.length < 2) return false;
@@ -57,7 +57,7 @@ function shouldUseTLS(server) {
     return TLS_PORTS.has(port);
 }
 
-// block speedtest domains
+// 屏蔽测速域名
 function isBlockedDomain(host) {
   if (!host) return false;
   const hostLower = host.toLowerCase();
@@ -66,7 +66,7 @@ function isBlockedDomain(host) {
   });
 }
 
-// 获取isp
+// 获取 isp
 async function getisp() {
   try {
     const res = await axios.get('https://api.ip.sb/geoip', { headers: { 'User-Agent': 'Mozilla/5.0', timeout: 3000 }});
@@ -83,38 +83,45 @@ async function getisp() {
   }
 }
 
-// 获取ip
+// 获取 ip
 async function getip() {
   if (!DOMAIN || DOMAIN === 'your-domain.com') {
       try {
           const res = await axios.get('https://api-ipv4.ip.sb/ip', { timeout: 5000 });
           const ip = res.data.trim();
-          CurrentDomain = ip, Tls = 'none', CurrentPort = PORT;
+          CurrentDomain = ip; Tls = 'none'; CurrentPort = PORT;
       } catch (e) {
           console.error('Failed to get IP', e.message);
-          CurrentDomain = 'cahnge-your-domain.com', Tls = 'tls', CurrentPort = 443;
+          CurrentDomain = 'cahnge-your-domain.com'; Tls = 'tls'; CurrentPort = 443;
       }
   } else {
-      CurrentDomain = DOMAIN, Tls = 'tls', CurrentPort = 443;
+      CurrentDomain = DOMAIN; Tls = 'tls'; CurrentPort = 443;
   }
 }
 
 // HTTP 路由
 const httpServer = http.createServer(async (req, res) => {
-  if (req.url === '/') {
-    const filePath = path.join(__dirname, 'index.html');
+  if (req.url === '/' || req.url === '') {
+    // 兼容 Vercel 多种环境下的文件查找
+    let filePath = path.resolve(process.cwd(), 'index.html');
+    if (!fs.existsSync(filePath)) {
+      filePath = path.join(__dirname, 'index.html');
+    }
+
     fs.readFile(filePath, 'utf8', (err, content) => {
       if (err) {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end('Hello world!');
+        // 如果文件实在找不到时的兜底展示
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(`<h2>未找到 index.html 文件，请确认仓库根目录下存在 index.html</h2>`);
         return;
       }
-      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(content);
     });
     return;
   } else if (req.url === `/${SUB_PATH}`) {
-    await getisp();await getip();
+    await getisp();
+    await getip();
     const namePart = NAME ? `${NAME}-${ISP}` : ISP;
     const tlsParam = Tls === 'tls' ? 'tls' : 'none';
     const ssTlsParam = Tls === 'tls' ? 'tls;' : '';
@@ -167,7 +174,7 @@ function resolveHost(host) {
   });
 }
 
-// VLE-SS处理
+// VLESS
 function handleVlsConnection(ws, msg) {
   const [VERSION] = msg;
   const id = msg.slice(1, 17);
@@ -199,7 +206,7 @@ function handleVlsConnection(ws, msg) {
   return true;
 }
 
-// Tro-jan处理
+// Trojan
 function handleTrojConnection(ws, msg) {
   try {
     if (msg.length < 58) return false;
@@ -248,7 +255,7 @@ function handleTrojConnection(ws, msg) {
   } catch (error) { return false; }
 }
 
-// Ss处理
+// Shadowsocks
 function handleSsConnection(ws, msg) {
   try {
     let offset = 0;
@@ -282,7 +289,7 @@ function handleSsConnection(ws, msg) {
   } catch (error) { return false; }
 }
 
-// Ws handler
+// WebSocket 监听
 const wss = new WebSocket.Server({ server: httpServer });
 wss.on('connection', (ws, req) => {
   const url = req.url || '';
@@ -303,18 +310,18 @@ wss.on('connection', (ws, req) => {
   }).on('error', () => { });
 });
 
-// 添加自动保活任务
+// 自动保活任务
 async function addAccessTask() {
   if (!AUTO_ACCESS) return;
   if (!DOMAIN) return;
   const fullURL = `https://${DOMAIN}/${SUB_PATH}`;
   try {
-    const res = await axios.post("https://oooo.serv00.net/add-url", { url: fullURL }, { headers: { 'Content-Type': 'application/json' } });
+    await axios.post("https://oooo.serv00.net/add-url", { url: fullURL }, { headers: { 'Content-Type': 'application/json' } });
     console.log('Automatic Access Task added successfully');
   } catch (error) { }
 }
 
-// NZ-Agent: Proto 定义 
+// NZ-Agent: Proto 定义
 const PROTO_CONTENT = `
 syntax = "proto3";
 option go_package = "./proto";
@@ -413,7 +420,7 @@ function loadProto() {
     }
 }
 
-// NZ-Agent: gRPC 认证
+// gRPC 认证
 function buildMetadata() {
     const meta = new grpc.Metadata();
     meta.add('client-secret', NEZHA_KEY);
@@ -423,7 +430,6 @@ function buildMetadata() {
     return meta;
 }
 
-// NZ-Agent: 系统监控
 let netInTransfer = 0, netOutTransfer = 0;
 let netInSpeed = 0, netOutSpeed = 0;
 let lastNetUpdate = 0;
@@ -549,7 +555,6 @@ async function getState() {
     };
 }
 
-// NZ-Agent: GeoIP
 function makeLookup(family) {
     return (hostname, opts, callback) => { dns.lookup(hostname, { family }, callback); };
 }
@@ -596,7 +601,7 @@ async function reportGeoIP(client, metadata, forceUpdate = false) {
         const { ipv4, ipv6 } = await fetchIP();
         const currentIPKey = ipv4 || ipv6 || '';
         if (!forceUpdate && lastReportedIP !== null && currentIPKey === lastReportedIP) return true;
-        if (!ipv4 && !ipv6) { log('[GeoIP] 外部 IP 获取失败，发送空 IP（服务端将使用连接地址）'); }
+        if (!ipv4 && !ipv6) { log('[GeoIP] 外部 IP 获取失败，发送空 IP'); }
         else { log('[GeoIP] 获取到 IP:', currentIPKey, '强制更新:', forceUpdate); }
         const geoIPReq = { use6: false, ip: { ipv4: ipv4 || '', ipv6: ipv6 || '' } };
         const success = await new Promise((resolve) => {
@@ -607,12 +612,11 @@ async function reportGeoIP(client, metadata, forceUpdate = false) {
                 else resolve(true);
             });
         });
-        if (success) { lastReportedIP = currentIPKey; log('[GeoIP] 上报成功, IP:', currentIPKey || '(空，使用连接地址)'); }
+        if (success) { lastReportedIP = currentIPKey; log('[GeoIP] 上报成功'); }
         return success;
     } catch (e) { logErr('[GeoIP] 异常:', e.message); return false; }
 }
 
-// NZ-Agent: 终端任务
 const TaskType = { TerminalGRPC: 8, FM: 11 };
 
 function handleTerminalTask(task, client, metadata) {
@@ -674,14 +678,13 @@ function handleTerminalTask(task, client, metadata) {
             };
             child = tryStart('script', ['-qfc', `${shell} -i`, '/dev/null']);
             if (!child) {
-                log('[Terminal] script 不可用，尝试 python3 pty');
                 child = tryStart('python3', ['-c', 'import pty,os,sys;pty.spawn([os.environ.get("SHELL","/bin/bash"),"-i"])']);
             }
             if (!child) {
                 child = tryStart('python', ['-c', 'import pty,os,sys;pty.spawn([os.environ.get("SHELL","/bin/bash"),"-i"])']);
             }
             if (!child) {
-                logErr('[Terminal] 无法创建伪终端（script/python 均不可用）');
+                logErr('[Terminal] 无法创建伪终端');
                 activeIOStreams--;
                 try { ioStream.end(); } catch (e) {}
                 return;
@@ -709,8 +712,6 @@ function handleTerminalTask(task, client, metadata) {
         };
     }
 
-    log('[Terminal] 初始化, StreamID:', terminal.StreamID);
-
     ptyProcess.onData((data) => {
         if (streamClosed) return;
         try { ioStream.write({ data: Buffer.from(data) }); } catch (e) { }
@@ -730,10 +731,9 @@ function handleTerminalTask(task, client, metadata) {
         try { ioStream.write({ data: Buffer.alloc(0) }); } catch (e) {}
     }, 30000);
 
-    ptyProcess.onExit((e) => { log('[Terminal] 退出, StreamID:', terminal.StreamID, 'code:', e.exitCode); cleanup(); });
+    ptyProcess.onExit((e) => { log('[Terminal] 退出, code:', e.exitCode); cleanup(); });
 }
 
-// NZ-Agent: SFTP
 const FM_NZFN = Buffer.from([0x4E, 0x5A, 0x46, 0x4E]);
 const FM_NZTD = Buffer.from([0x4E, 0x5A, 0x54, 0x44]);
 const FM_NERR = Buffer.from([0x4E, 0x45, 0x52, 0x52]);
@@ -751,8 +751,6 @@ function handleFMTask(task, client, metadata) {
     const streamIDData = Buffer.concat([Buffer.from([0xff, 0x05, 0xff, 0x05]), Buffer.from(fmTask.StreamID || '')]);
     try { ioStream.write({ data: streamIDData }); }
     catch (e) { logErr('[FM] 发送 StreamID 失败:', e.message); activeIOStreams--; return; }
-
-    log('[FM] 初始化, StreamID:', fmTask.StreamID);
 
     const keepAlive = setInterval(() => {
         if (streamClosed) return;
@@ -814,12 +812,10 @@ function handleFMTask(task, client, metadata) {
             writeStream.on('finish', () => {
                 if (uploadState && !uploadState.finished) {
                     uploadState.finished = true;
-                    log('[FM] 文件接收完成');
                     ioStream.write({ data: FM_NZUP });
                     uploadState = null;
                 }
             });
-            log('[FM] 接收文件:', filePath, '大小:', fileSize);
         } catch (err) { sendError(err.message); }
     }
 
@@ -849,10 +845,9 @@ function handleFMTask(task, client, metadata) {
         }
     };
     ioStream.on('error', (err) => { logErr('[FM] IOStream 错误:', err.message); cleanup(); });
-    ioStream.on('end', () => { log('[FM] IOStream 结束, StreamID:', fmTask.StreamID); cleanup(); });
+    ioStream.on('end', () => { cleanup(); });
 }
 
-// NZ-Agent: 任务分发 
 function dispatchTask(task, taskStream, client, metadata) {
     switch (task.type) {
         case TaskType.TerminalGRPC: handleTerminalTask(task, client, metadata); break;
@@ -860,7 +855,6 @@ function dispatchTask(task, taskStream, client, metadata) {
     }
 }
 
-// NZ-Agent: 辅助函数
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 function callWithTimeout(fn, timeoutMs) {
@@ -870,16 +864,12 @@ function callWithTimeout(fn, timeoutMs) {
     });
 }
 
-// NZ-Agent: 主循环
+// 主循环
 async function startNezhaAgent() {
     if (!NEZHA_SERVER || !NEZHA_KEY) {
         console.log('[Nezha] NEZHA_SERVER 或 NEZHA_KEY 未配置，跳过哪吒 agent');
         return;
     }
-
-    log('[Nezha] 服务器:', NEZHA_SERVER);
-    log('[Nezha] TLS:', shouldUseTLS(NEZHA_SERVER) ? '启用' : '禁用');
-    log('[Nezha] UUID:', UUID);
 
     const proto = loadProto();
     const useTLS = shouldUseTLS(NEZHA_SERVER);
@@ -889,7 +879,6 @@ async function startNezhaAgent() {
     let lastReportHostInfo = 0;
     let lastReportIPInfo = 0;
     let geoipReported = false;
-    let prevDashboardBootTime = 0;
 
     while (true) {
         let client = null;
@@ -902,20 +891,16 @@ async function startNezhaAgent() {
             console.log('nzbot is running...');
 
             const hostInfo = await getHost();
-            let dashboardBootTime = 0;
             try {
-                const receipt = await callWithTimeout(
+                await callWithTimeout(
                     (cb) => client.ReportSystemInfo2(hostInfo, metadata, cb), NETWORK_TIMEOUT
                 );
-                dashboardBootTime = receipt.data || 0;
-                log('[Agent] 上报系统信息成功, Dashboard BootTime:', dashboardBootTime);
             } catch (err) {
                 logErr('[Agent] 上报系统信息失败:', err.message);
                 throw err;
             }
 
             geoipReported = false;
-            prevDashboardBootTime = dashboardBootTime;
 
             try {
                 const success = await reportGeoIP(client, metadata, true);
@@ -923,14 +908,11 @@ async function startNezhaAgent() {
             } catch (e) { logErr('[GeoIP] 首次上报异常:', e.message); }
 
             taskStream = client.RequestTask(metadata);
-            log('[Agent] RequestTask strem connect');
-
             stateStream = client.ReportSystemState(metadata);
-            log('[Agent] ReportSystemState strem connect');
 
             taskStream.on('data', (task) => { dispatchTask(task, taskStream, client, metadata); });
-            taskStream.on('error', (err) => { logErr('[Agent] RequestTask strem error:', err.message); workerCancelled = true; });
-            taskStream.on('end', () => { log('[Agent] RequestTask strem finished'); workerCancelled = true; });
+            taskStream.on('error', (err) => { workerCancelled = true; });
+            taskStream.on('end', () => { workerCancelled = true; });
 
             const stateLoop = (async () => {
                 while (!workerCancelled) {
@@ -945,58 +927,3 @@ async function startNezhaAgent() {
                                 stateStream.removeListener('data', onReceipt);
                                 stateStream.removeListener('error', onError);
                                 reject(new Error('receipt timeout'));
-                            }, NETWORK_TIMEOUT);
-                            const onReceipt = (msg) => { clearTimeout(timer); stateStream.removeListener('error', onError); resolve(msg); };
-                            const onError = (err) => { clearTimeout(timer); stateStream.removeListener('data', onReceipt); reject(err); };
-                            stateStream.once('data', onReceipt);
-                            stateStream.once('error', onError);
-                        });
-                        const now = Date.now();
-                        if (now - lastReportHostInfo > 10 * 60 * 1000) {
-                            try {
-                                const hostRefresh = await getHost();
-                                await callWithTimeout((cb) => client.ReportSystemInfo2(hostRefresh, metadata, cb), 10000);
-                                lastReportHostInfo = now;
-                            } catch (e) { }
-                        }
-                        if (now - lastReportIPInfo > IP_REPORT_PERIOD * 1000 || !geoipReported) {
-                            const forceUpdate = !geoipReported;
-                            const success = await reportGeoIP(client, metadata, forceUpdate);
-                            if (success) { lastReportIPInfo = now; geoipReported = true; }
-                        }
-                    } catch (err) {
-                        logErr('[Agent] error:', err.message);
-                        workerCancelled = true;
-                        break;
-                    }
-                    await sleep(REPORT_DELAY * 1000);
-                }
-            })();
-
-            await stateLoop;
-
-        } catch (err) {
-            logErr('[Agent] connect error:', err.message);
-        } finally {
-            if (activeIOStreams > 0) {
-                log(`[Agent] 等待 ${activeIOStreams} 个活跃 IOStream 会话结束...`);
-                const waitStart = Date.now();
-                while (activeIOStreams > 0 && Date.now() - waitStart < 5000) await sleep(100);
-                if (activeIOStreams > 0) logWarn(`[Agent] 仍有 ${activeIOStreams} 个 IOStream 会话未结束，强制关闭`);
-            }
-            try { if (taskStream) taskStream.end(); } catch (e) {}
-            try { if (stateStream) stateStream.end(); } catch (e) {}
-            try { if (client) client.close(); } catch (e) {}
-        }
-
-        log('[Agent] retry connect...');
-        await sleep(RETRY_DELAY);
-    }
-}
-
-// start service
-httpServer.listen(PORT, () => {
-  startNezhaAgent().catch(err => console.error('error', err));
-  addAccessTask();
-  console.log(`Server is running on ${PORT}`);
-});
